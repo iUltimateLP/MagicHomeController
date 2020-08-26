@@ -66,6 +66,11 @@ namespace MagicHomeController
                 // Debug if wanted
                 if (Debug) Console.WriteLine("OUT UDP: " + answer);
             }
+            else
+            {
+                // Be ready to receive new data over UDP again
+                udpSocket.BeginReceive(UDPReceiveCallback, null);
+            }
         }
 
         /// <summary>
