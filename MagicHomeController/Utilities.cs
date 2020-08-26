@@ -69,5 +69,23 @@ namespace MagicHomeController
             // And directly converted into a byte (without encoding)
             return Convert.ToByte(str, 16);
         }
+
+        /// <summary>
+        /// Converts the bytes to a readable hex string
+        /// </summary>
+        public static string BytesToHexString(byte[] bytes)
+        {
+            // Will hold the result
+            string outString = "";
+
+            // Go through each byte and append it's string representation to the string
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                outString += bytes[i].ToString("X") + " ";
+            }
+
+            // Return it
+            return outString;
+        }
     }
 }

@@ -36,6 +36,11 @@ namespace MagicHomeController
         private Controller controller;
 
         /// <summary>
+        /// If set to true, the library will debug the communication in the console
+        /// </summary>
+        public bool Debug = false;
+
+        /// <summary>
         /// Called when the UDP socket receives any data
         /// </summary>
         private void UDPReceiveCallback(IAsyncResult asyncResult)
@@ -43,6 +48,9 @@ namespace MagicHomeController
             // End receiving (because we're async) and read what we received
             byte[] data = udpSocket.EndReceive(asyncResult, ref udpEndPoint);
             string message = Encoding.UTF8.GetString(data);
+
+            // Debug if wanted
+            if (Debug) Console.WriteLine("IN  UDP: " + message);
 
             // Did the app send us the magic discovery message?
             if (message == MAGICHOME_DISCOVERY_MESSAGE)
@@ -54,6 +62,9 @@ namespace MagicHomeController
 
                 // Send this fake device string to the UDP endpoint which asked. From now on, the app will communicate with us over TCP
                 udpSocket.BeginSend(rawAnswer, rawAnswer.Count(), udpEndPoint, UDPSendCallback, null);
+
+                // Debug if wanted
+                if (Debug) Console.WriteLine("OUT UDP: " + answer);
             }
         }
 
@@ -86,6 +97,16 @@ namespace MagicHomeController
                 byte[] tcpMessage = new byte[60];
                 networkStream.Read(tcpMessage, 0, tcpMessage.Length);
 
+                // Debug if wanted
+                if (Debug) Console.WriteLine("IN  TCP: " + Utilities.BytesToHexString(tcpMessage));
+
+                // If we receive a completely empty message (which can happen when refreshing multiple times in the app),
+                // stop reading data and close the connection
+                if (tcpMessage[0] == 0x0 && tcpMessage[1] == 0x0 && tcpMessage[2] == 0x0)
+                {
+                    break;
+                }
+
                 // Now we will handle the different commands the MagicHome app can send us. 
                 HandleMagicHomeCommand(ref networkStream, tcpMessage);
             }
@@ -112,8 +133,11 @@ namespace MagicHomeController
                 // Get the raw controller data to send
                 byte[] controllerData = controller.GetRawControllerData();
 
-                // Write the data to the TCP connection
-                networkStream.Write(controllerData, 0, controllerData.Length);
+                // Send the data
+                SendData(networkStream, controllerData);
+
+                // Debug if wanted
+                if (Debug) Console.WriteLine("OUT TCP: " + Utilities.BytesToHexString(controllerData));
             }
             // Command: 0x71 ON/OFF REMOTE/LOCAL - toggle the light's power state
             else if (command == 0x71)
@@ -128,18 +152,14 @@ namespace MagicHomeController
                 controller.SetPowerState(turnOn);
 
                 // The payload response for this command is four bytes:
-                byte[] responseData = new byte[4] {
+                byte[] responseData = new byte[3] {
                         0xf0, // The inverse of tcpMessage[2]
                         0x71, // The command ID
-                        payload[1], // The new state (which is the same as we were told in the command)
-                        0x00  // Checksum
+                        payload[1] // The new state (which is the same as we were told in the command)
                     };
 
-                // Calculate the checksum for the payload and set the last byte to it
-                responseData[3] = Utilities.CalculateChecksum(responseData);
-
-                // Write the data to the TCP connection
-                networkStream.Write(responseData, 0, responseData.Length);
+                // Send the data
+                SendData(networkStream, responseData);
             }
             // Command: 0x31 RR GG BB WW - set the color of the light
             else if (command == 0x31)
@@ -155,6 +175,25 @@ namespace MagicHomeController
                 
                 // Don't need to send a response here
             }
+        }
+
+        /// <summary>
+        /// Sends data to the TCP network stream. Handles checksum calculation aswell
+        /// </summary>
+        public void SendData(NetworkStream stream, byte[] data)
+        {
+            // Contains the data including the checksum byte
+            byte[] dataWithChecksum = new byte[data.Length + 1];
+            data.CopyTo(dataWithChecksum, 0);
+
+            // Calculate the checksum for the payload and set the last byte to it
+            dataWithChecksum[dataWithChecksum.Length - 1] = Utilities.CalculateChecksum(data);
+
+            // Write the data to the TCP connection
+            stream.Write(dataWithChecksum, 0, dataWithChecksum.Length);
+
+            // Debug if wanted
+            if (Debug) Console.WriteLine("OUT TCP: " + Utilities.BytesToHexString(dataWithChecksum));
         }
 
         /// <summary>
@@ -178,9 +217,15 @@ namespace MagicHomeController
             // Start listening for UDP data
             udpSocket.BeginReceive(UDPReceiveCallback, null);
 
+            // Debug
+            if (Debug) Console.WriteLine("Started UDP listening on port " + MAGICHOME_UDP_PORT);
+
             // Start listening for TCP data
             tcpSocket.Start();
             tcpSocket.BeginAcceptTcpClient(TCPReceiveCallback, null);
+
+            // Debug
+            if (Debug) Console.WriteLine("Started TCP listening on port " + MAGICHOME_TCP_PORT);
         }
     }
 }

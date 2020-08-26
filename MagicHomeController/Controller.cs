@@ -56,7 +56,7 @@ namespace MagicHomeController
         /// </summary>
         public byte[] GetRawControllerData()
         {
-            byte[] controller = new byte[14]
+            byte[] controller = new byte[13]
             {
                 0x81,                           // The command ID
                 ModelVersion,                   // Model version, displayed in the app
@@ -70,12 +70,8 @@ namespace MagicHomeController
                 Color.White,                    // W color (if any)
                 FirmwareVersion,                // Firmware version, displayed in the app
                 0x00,                           // Not sure
-                0x00,                           // Not sure
-                0x00                            // Checksum, read about how it works in the implementation of Utilities.CalculateChecksum
+                0x00                            // Not sure
             };
-
-            // Calculate the checksum for the payload and set the last byte to it
-            controller[13] = Utilities.CalculateChecksum(controller);
 
             // Return it
             return controller;
