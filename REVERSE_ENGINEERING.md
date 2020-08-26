@@ -12,7 +12,7 @@ Every device in the LAN network will receive this broadcast, but only controller
 
 Controllers receiving this will answer with the following: `192.168.x.x,AABBCCDDEEFF,AK001-ZJ2101`. That's a comma-delimited string containing the IP address of the controller, the MAC address and the model identifier.
 
-That string tells the MagicHome app where it can reach a controller, so we can spoof this and answer our own IP and MAC address to the UDP broadcast of the app. From now on, the communication will take place via TCP and in a binary protocol.
+That string tells the MagicHome app where it can reach a controller, so we can spoof this and answer our own IP and MAC address to the UDP broadcast of the app. From now on, the communication will take place via TCP on port 5577 and in a binary protocol.
 
 Why TCP? Because it's more reliable than UDP - and we do want that smooth scrolling over the color wheel!
 
@@ -88,3 +88,19 @@ So all we have to do is detect that command and look at the second byte to see w
 Sending that back will let the MagicHome app know that we processed the request.
 
 ## Command: Set color
+The last command I reverse engineered is the command the app sends to our controller to change the color:
+
+|00|01|02|03|04|05|
+|--|--|--|--|--|--|
+|`31`|`FF`|`00`|`00`|`00`|`??`|
+
+|Num|Description|
+|---|-----------|
+|00|The command ID, it's `0x31`|
+|01|New R color|
+|02|New G color|
+|03|New B color|
+|04|New W color|
+|05|Checksum|
+
+This command is easy, we don't have to send any response back, only thing we can do is parse the color bytes and handle it how we want it.
