@@ -6,7 +6,7 @@ I've had help of a few libraries on GitHub, but most of the reverse engineering 
 ## Discovery
 The MagicHome app is able to discover controllers on the network without them linked to your account. That means, when we figure out how that works, we can smuggle in a fake controller!
 
-The discovery process is obvious: the app sends a UDP broadcast (`255.255.255.255`) under the port `48899`. The broadcast contains a message: `HF-A11ASSISTHREAD`. I don't know what that means, but it's the same for a lot of ZENGGE/FLUX/MagicHome devices.
+The discovery process is obvious: the app sends a UDP broadcast (`255.255.255.255`) under the port 48899. The broadcast contains a message: `HF-A11ASSISTHREAD`. I don't know what that means, but it's the same for a lot of ZENGGE/FLUX/MagicHome devices.
 
 Every device in the LAN network will receive this broadcast, but only controllers will understand what it means. Well, and me.
 
