@@ -1,5 +1,5 @@
 # The reverse engineering of the MagicHome protocol
-There are a few libraries out there which implement the client side of the MagicHome protocl, which is the app. But there wasn't (until now) a library which implements the "server" side, which would be the controller connected to the LEDs.  
+There are a few libraries out there which implement the client side of the [MagicHome](https://play.google.com/store/apps/details?id=com.zengge.wifi&hl=de) protocol, which is the app. But there wasn't (until now) a library which implements the "server" side, which would be the [controller](aliexpress.com/item/33035745736.html?src=google&albch=shopping&acnt=494-037-6276&isdl=y&slnk=&plac=&mtctp=&albbt=Gploogle_7_shopping&aff_atform=google&aff_short_key=UneMJZVf&&albagn=888888&albcp=1705854617&albag=67310370915&trgt=743612850714&crea=de33035745736&netw=u&device=c&albpg=743612850714&albpd=de33035745736&gclid=CjwKCAjwkJj6BRA-EiwA0ZVPVndgdbe_APMj71f5FiGF1x9L4pg2KP_3WflQhmYt4-kunBiLryhhrRoC_UwQAvD_BwE&gclsrc=aw.ds) connected to the LEDs.  
 
 I've had help of a few libraries on GitHub, but most of the reverse engineering described here results out of a Packet Trace app on my Android phone and Wireshark.
 
