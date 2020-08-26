@@ -42,6 +42,8 @@ namespace MagicHomeController.Example
             magicHome.AddController(controller);
             magicHome.Start();
 
+            Console.WriteLine("Fake controller successfully started. Open your MagicHome app!");
+
             // Wait and don't close the program directly again
             Console.ReadLine();
         }
